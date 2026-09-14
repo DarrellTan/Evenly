@@ -2,6 +2,8 @@
 
 > Free, self-hostable travel expense splitting for friend groups. A privacy-first, community-driven alternative to Splitwise.
 
+📖 **New here? Follow the [Get Started Guide](GET_STARTED.md) to set up Evenly in 3 minutes.**
+
 ---
 
 ## ✨ Why Evenly?
@@ -23,7 +25,7 @@ When traveling in groups, tracking expenses across foreign currencies, spotty ce
 Evenly/
 ├── apps/
 │   ├── mobile/         # React Native / Expo app (iOS & Android)
-│   └── web/            # Next.js 15 (App Router) self-hosted portal & API
+│   └── web/            # Next.js 16 (App Router) self-hosted portal & API
 ├── packages/
 │   └── shared/         # Core split math, debt simplification, and TypeScript models
 └── supabase/           # PostgreSQL schema, migrations, and Row Level Security
@@ -31,15 +33,41 @@ Evenly/
 
 ---
 
-## 🚀 Roadmap
+## ⚡️ Database Setup
 
-- [ ] Core monorepo setup and shared models (`packages/shared`)
-- [ ] Supabase schema with individual user accounts and trip rosters
-- [ ] Next.js self-hosted web portal with 1-click Vercel deployment
-- [ ] Magic Connect QR code generator and deep linking
-- [ ] Mobile app with offline receipt OCR and sync queue
-- [ ] PDF settlement export
-- [ ] Video setup guide for self-hosters
+Evenly supports three zero-friction database setup workflows:
+
+### Option A: Local Development with Supabase CLI (Recommended for Devs)
+Run local Supabase with Docker (Postgres, Auth, Realtime, and all migrations automatically applied):
+```bash
+npm run db:start
+```
+
+### Option B: Remote Database via CLI (`db:push`)
+Push all migrations directly to your remote Supabase or Postgres database:
+```bash
+npm run db:push -- --db-url "postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres"
+```
+
+### Option C: Supabase Web Dashboard (1-Click SQL Paste)
+1. Open your Supabase Dashboard: `https://supabase.com/dashboard/project/[PROJECT-REF]/sql/new`
+2. Paste the contents of [`supabase/full_schema.sql`](supabase/full_schema.sql)
+3. Click **Run** (`Cmd + Enter`)
+
+---
+
+## 💻 Running the Web App
+
+```bash
+# 1. Install dependencies
+npm install
+
+# 2. Build shared packages
+npm run build:shared
+
+# 3. Start Next.js development server
+npm --workspace=apps/web run dev
+```
 
 ---
 

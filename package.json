@@ -13,7 +13,11 @@
     "build": "npm run build:shared && npm run build:web",
     "web:dev": "npm run build:shared && npm --workspace=apps/web run dev",
     "mobile:start": "npm --workspace=apps/mobile start",
-    "test": "npm --workspace=packages/shared test"
+    "test": "npm --workspace=packages/shared test",
+    "db:start": "npx supabase start",
+    "db:stop": "npx supabase stop",
+    "db:push": "npx supabase db push",
+    "db:reset": "npx supabase db reset"
   },
   "keywords": [
     "expense-splitter",
