@@ -3,8 +3,11 @@
 import React, { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Compass, Users, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Compass, ArrowRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
 
 export default function JoinTripPage({ params }: { params: Promise<{ code: string }> }) {
   const resolvedParams = use(params);
@@ -36,7 +39,6 @@ export default function JoinTripPage({ params }: { params: Promise<{ code: strin
         } else {
           setTrip(tripData);
 
-          // If logged in, check if already member
           if (userData.user) {
             const { data: member } = await supabase
               .from("trip_members")
@@ -46,7 +48,6 @@ export default function JoinTripPage({ params }: { params: Promise<{ code: strin
               .maybeSingle();
 
             if (member) {
-              // Already a member, redirect to trip
               router.push(`/trips/${tripData.id}`);
             }
           }
@@ -89,7 +90,7 @@ export default function JoinTripPage({ params }: { params: Promise<{ code: strin
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="w-8 h-8 rounded-full border-2 border-indigo-500 border-t-transparent animate-spin" />
+        <div className="w-8 h-8 rounded-full border-2 border-accent border-t-transparent animate-spin" />
       </div>
     );
   }
@@ -97,12 +98,12 @@ export default function JoinTripPage({ params }: { params: Promise<{ code: strin
   if (error || !trip) {
     return (
       <div className="max-w-md mx-auto py-16 text-center space-y-4">
-        <div className="w-12 h-12 rounded-2xl bg-red-950/40 text-red-400 border border-red-800/60 mx-auto flex items-center justify-center">
+        <div className="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-500 border border-rose-200 dark:border-rose-900/60 mx-auto flex items-center justify-center font-bold">
           !
         </div>
-        <h2 className="text-xl font-bold text-white">Trip Not Found</h2>
-        <p className="text-xs text-slate-400">{error || "Please check the invite code and try again."}</p>
-        <Link href="/" className="inline-block text-xs text-indigo-400 hover:underline">
+        <h2 className="text-xl font-bold text-primary">Trip Not Found</h2>
+        <p className="text-xs text-secondary">{error || "Please check the invite code and try again."}</p>
+        <Link href="/" className="inline-block text-xs text-accent hover:underline">
           Return to Evenly Home
         </Link>
       </div>
@@ -111,50 +112,41 @@ export default function JoinTripPage({ params }: { params: Promise<{ code: strin
 
   return (
     <div className="max-w-md mx-auto py-12 px-4">
-      <div className="rounded-3xl bg-slate-900/90 border border-slate-800 p-8 shadow-2xl backdrop-blur-xl text-center">
-        <div className="w-16 h-16 rounded-2xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 mx-auto flex items-center justify-center mb-5">
+      <Card className="p-8 text-center">
+        <div className="w-16 h-16 rounded-3xl bg-accent-subtle text-accent border border-accent-border/40 mx-auto flex items-center justify-center mb-5 shadow-apple-sm">
           <Compass size={32} />
         </div>
 
-        <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-400">
+        <Badge variant="accent" className="mb-2">
           You are invited to join
-        </span>
-        <h1 className="text-2xl font-black text-white mt-1 mb-2">{trip.name}</h1>
+        </Badge>
+        <h1 className="text-2xl font-black text-primary mt-1 mb-1">{trip.name}</h1>
         {trip.destination && (
-          <p className="text-xs text-slate-400 mb-6">{trip.destination}</p>
+          <p className="text-xs text-secondary mb-6">{trip.destination}</p>
         )}
 
-        <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800/80 text-xs text-slate-300 mb-6 space-y-2">
+        <div className="p-4 rounded-2xl bg-surface-subtle border border-subtle text-xs text-secondary mb-6 space-y-2">
           <div className="flex justify-between">
-            <span className="text-slate-500">Base Currency</span>
-            <span className="font-bold text-white">{trip.base_currency}</span>
+            <span className="text-muted">Base Currency</span>
+            <span className="font-bold text-primary">{trip.base_currency}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-slate-500">Invite Code</span>
-            <span className="font-mono text-indigo-400 font-bold">{code}</span>
+            <span className="text-muted">Invite Code</span>
+            <span className="font-mono text-accent font-bold">{code}</span>
           </div>
         </div>
 
-        <button
+        <Button
           onClick={handleJoin}
           disabled={joining}
-          className="w-full py-3 px-4 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 active:scale-[0.99] transition shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 disabled:opacity-50"
+          variant="primary"
+          size="lg"
+          className="w-full"
+          icon={<ArrowRight size={16} />}
         >
-          {joining ? (
-            <span>Joining Trip...</span>
-          ) : user ? (
-            <>
-              <span>Join Trip</span>
-              <ArrowRight size={16} />
-            </>
-          ) : (
-            <>
-              <span>Sign In to Join Trip</span>
-              <ArrowRight size={16} />
-            </>
-          )}
-        </button>
-      </div>
+          {joining ? "Joining Trip..." : user ? "Join Trip" : "Sign In to Join Trip"}
+        </Button>
+      </Card>
     </div>
   );
 }

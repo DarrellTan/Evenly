@@ -3,39 +3,77 @@
 @tailwind utilities;
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  /* Apple HIG Light Theme - White Canvas, Black Text, Clean Emerald */
+  --bg-canvas: #ffffff;
+  --bg-surface: #ffffff;
+  --bg-surface-grouped: #f9fafb;
+  --bg-elevated: #ffffff;
+  --bg-subtle: #f3f4f6;
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+
+  --border-subtle: #e5e7eb;
+  --border-strong: #d1d5db;
+
+  /* Refined Emerald Green Accent */
+  --accent-primary: #10b981;
+  --accent-hover: #059669;
+  --accent-subtle: #ecfdf5;
+  --accent-border: #a7f3d0;
+  --accent-text: #059669;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #090d16;
-    --foreground: #f8fafc;
-  }
+.dark {
+  /* Supabase-inspired Dark Theme - Soft Charcoal Canvas, Layered Surfaces */
+  --bg-canvas: #171717;           /* Supabase soft dark background */
+  --bg-surface: #1f1f1f;          /* Supabase card & panel surface */
+  --bg-surface-grouped: #252525;  /* Grouped content panels */
+  --bg-elevated: #282828;         /* Modals, sheets, popovers */
+  --bg-subtle: #2d2d2d;           /* Inputs, search bars, chips */
+
+  --text-primary: #f3f4f6;
+  --text-secondary: #a3a3a3;
+  --text-muted: #737373;
+
+  --border-subtle: #2e2e2e;
+  --border-strong: #404040;
+
+  /* Supabase Brand Emerald */
+  --accent-primary: #10b981;      /* Refined emerald button */
+  --accent-hover: #059669;
+  --accent-subtle: #132b21;       /* Subtle dark emerald tint */
+  --accent-border: #1e4b39;
+  --accent-text: #34d399;         /* Soft mint text */
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text-primary);
+  background-color: var(--bg-canvas);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.011em;
 }
 
-.glass-card {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(226, 232, 240, 0.8);
+/* Apple Liquid Glass Material */
+.apple-glass {
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--border-subtle);
 }
 
-@media (prefers-color-scheme: dark) {
-  .glass-card {
-    background: rgba(17, 24, 39, 0.7);
-    border: 1px solid rgba(55, 65, 81, 0.5);
-  }
+.dark .apple-glass {
+  background-color: rgba(23, 23, 23, 0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--border-subtle);
 }
 
-/* Custom subtle scrollbars */
+/* Subtle Apple Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -44,9 +82,12 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(156, 163, 175, 0.4);
+  background: rgba(148, 163, 184, 0.3);
   border-radius: 9999px;
 }
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(115, 115, 115, 0.4);
+}
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(156, 163, 175, 0.6);
+  background: rgba(115, 115, 115, 0.7);
 }

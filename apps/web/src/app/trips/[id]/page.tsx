@@ -13,16 +13,16 @@ import {
   Activity,
   ArrowRight,
   TrendingUp,
-  Calendar,
-  DollarSign,
-  Smartphone,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { simplifyDebts, type SimplifiedDebt, type UserBalance } from "@evenly/shared";
+import { simplifyDebts, type UserBalance } from "@evenly/shared";
 import { AddExpenseModal } from "@/components/trip/AddExpenseModal";
 import { SettleUpModal } from "@/components/trip/SettleUpModal";
 import { InviteMemberModal } from "@/components/trip/InviteMemberModal";
 import { ConnectMobileModal } from "@/components/ConnectMobileModal";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
 
 export default function TripDashboardPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -89,7 +89,7 @@ export default function TripDashboardPage({ params }: { params: Promise<{ id: st
 
       setMembers(memberData || []);
 
-      // 3. Fetch Expenses with items & assignments
+      // 3. Fetch Expenses
       const { data: expData } = await supabase
         .from("expenses")
         .select(`
@@ -157,7 +157,7 @@ export default function TripDashboardPage({ params }: { params: Promise<{ id: st
   useEffect(() => {
     loadTripData();
 
-    // Setup Supabase Realtime Channels for live synchronization
+    // Realtime Channels
     const channel = supabase
       .channel(`trip-realtime:${tripId}`)
       .on(
@@ -191,7 +191,6 @@ export default function TripDashboardPage({ params }: { params: Promise<{ id: st
       balancesMap[m.user_id] = { totalPaid: 0, totalOwed: 0 };
     });
 
-    // 1. Tally Expenses
     expenses.forEach((exp) => {
       const payerId = exp.paid_by_user_id;
       const baseTotal = exp.base_currency_amount || 0;
@@ -199,7 +198,6 @@ export default function TripDashboardPage({ params }: { params: Promise<{ id: st
         balancesMap[payerId].totalPaid += baseTotal;
       }
 
-      // Calculate consumption
       const items = exp.expense_items || [];
       if (items.length > 0) {
         items.forEach((item: any) => {
@@ -216,7 +214,6 @@ export default function TripDashboardPage({ params }: { params: Promise<{ id: st
           }
         });
       } else {
-        // Equal split fallback
         const splitAmount = members.length > 0 ? baseTotal / members.length : 0;
         members.forEach((m) => {
           if (balancesMap[m.user_id]) {
@@ -226,7 +223,6 @@ export default function TripDashboardPage({ params }: { params: Promise<{ id: st
       }
     });
 
-    // 2. Tally Settlements
     settlements.forEach((s) => {
       if (s.status === "completed") {
         if (balancesMap[s.from_user_id]) {
@@ -248,7 +244,6 @@ export default function TripDashboardPage({ params }: { params: Promise<{ id: st
       };
     });
 
-    // Run greedy simplification
     const debts = simplifyDebts(calculatedBalances, trip?.base_currency || "USD");
 
     return {
@@ -271,7 +266,7 @@ export default function TripDashboardPage({ params }: { params: Promise<{ id: st
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="w-8 h-8 rounded-full border-2 border-indigo-500 border-t-transparent animate-spin" />
+        <div className="w-8 h-8 rounded-full border-2 border-accent border-t-transparent animate-spin" />
       </div>
     );
   }
@@ -279,8 +274,8 @@ export default function TripDashboardPage({ params }: { params: Promise<{ id: st
   if (!trip) {
     return (
       <div className="text-center py-16 space-y-4">
-        <h2 className="text-xl font-bold text-white">Trip not found or access denied</h2>
-        <Link href="/" className="text-xs text-indigo-400 hover:underline">
+        <h2 className="text-xl font-bold text-primary">Trip not found or access denied</h2>
+        <Link href="/" className="text-xs text-accent hover:underline">
           Return to Dashboard
         </Link>
       </div>
@@ -290,98 +285,101 @@ export default function TripDashboardPage({ params }: { params: Promise<{ id: st
   return (
     <div className="py-6 space-y-6">
       {/* Header Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-subtle pb-6">
         <div>
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white mb-2 transition"
+            className="inline-flex items-center gap-1.5 text-xs text-secondary hover:text-primary mb-2 transition"
           >
             <ArrowLeft size={14} />
             <span>All Trips</span>
           </Link>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">{trip.name}</h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-indigo-950/80 text-indigo-400 border border-indigo-800/60">
-              {trip.base_currency}
-            </span>
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-primary">{trip.name}</h1>
+            <Badge variant="accent">{trip.base_currency}</Badge>
           </div>
           {trip.destination && (
-            <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
-              <Compass size={13} className="text-indigo-400" />
+            <p className="text-xs text-secondary mt-1 flex items-center gap-1">
+              <Compass size={13} className="text-accent" />
               <span>{trip.destination}</span>
             </p>
           )}
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={() => setIsInviteOpen(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 bg-slate-900 hover:bg-slate-800 border border-slate-800 transition shadow-sm"
+            icon={<Share2 size={14} className="text-accent" />}
           >
-            <Share2 size={14} className="text-indigo-400" />
             <span>Invite Code ({trip.invite_code})</span>
-          </button>
-          <button
+          </Button>
+
+          <Button
+            variant="tinted"
+            size="sm"
             onClick={() => handleOpenSettle()}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-emerald-400 bg-emerald-950/40 hover:bg-emerald-950/70 border border-emerald-800/50 transition shadow-sm"
+            icon={<CheckCircle2 size={14} />}
           >
-            <CheckCircle2 size={14} />
             <span>Settle Up</span>
-          </button>
-          <button
+          </Button>
+
+          <Button
+            variant="primary"
+            size="sm"
             onClick={() => setIsAddExpenseOpen(true)}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 transition shadow-md shadow-indigo-600/30"
+            icon={<Plus size={15} />}
           >
-            <Plus size={15} />
             <span>Add Expense</span>
-          </button>
+          </Button>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-800/80 pb-1 overflow-x-auto text-xs font-semibold">
+      {/* Segmented Tabs */}
+      <div className="flex items-center gap-1 p-1 rounded-2xl bg-surface-subtle border border-subtle w-fit text-xs font-semibold">
         <button
           onClick={() => setActiveTab("balances")}
-          className={`px-4 py-2 rounded-xl transition flex items-center gap-2 ${
+          className={`px-3.5 py-1.5 rounded-xl transition-all duration-150 flex items-center gap-2 ${
             activeTab === "balances"
-              ? "bg-indigo-600/10 text-indigo-400 border border-indigo-500/30"
-              : "text-slate-400 hover:text-slate-200"
+              ? "bg-surface text-primary shadow-apple-sm"
+              : "text-secondary hover:text-primary"
           }`}
         >
-          <TrendingUp size={14} />
+          <TrendingUp size={14} className={activeTab === "balances" ? "text-accent" : ""} />
           <span>Balances & Debts</span>
         </button>
         <button
           onClick={() => setActiveTab("expenses")}
-          className={`px-4 py-2 rounded-xl transition flex items-center gap-2 ${
+          className={`px-3.5 py-1.5 rounded-xl transition-all duration-150 flex items-center gap-2 ${
             activeTab === "expenses"
-              ? "bg-indigo-600/10 text-indigo-400 border border-indigo-500/30"
-              : "text-slate-400 hover:text-slate-200"
+              ? "bg-surface text-primary shadow-apple-sm"
+              : "text-secondary hover:text-primary"
           }`}
         >
-          <Receipt size={14} />
+          <Receipt size={14} className={activeTab === "expenses" ? "text-accent" : ""} />
           <span>Expenses ({expenses.length})</span>
         </button>
         <button
           onClick={() => setActiveTab("activity")}
-          className={`px-4 py-2 rounded-xl transition flex items-center gap-2 ${
+          className={`px-3.5 py-1.5 rounded-xl transition-all duration-150 flex items-center gap-2 ${
             activeTab === "activity"
-              ? "bg-indigo-600/10 text-indigo-400 border border-indigo-500/30"
-              : "text-slate-400 hover:text-slate-200"
+              ? "bg-surface text-primary shadow-apple-sm"
+              : "text-secondary hover:text-primary"
           }`}
         >
-          <Activity size={14} />
+          <Activity size={14} className={activeTab === "activity" ? "text-accent" : ""} />
           <span>Activity</span>
         </button>
         <button
           onClick={() => setActiveTab("members")}
-          className={`px-4 py-2 rounded-xl transition flex items-center gap-2 ${
+          className={`px-3.5 py-1.5 rounded-xl transition-all duration-150 flex items-center gap-2 ${
             activeTab === "members"
-              ? "bg-indigo-600/10 text-indigo-400 border border-indigo-500/30"
-              : "text-slate-400 hover:text-slate-200"
+              ? "bg-surface text-primary shadow-apple-sm"
+              : "text-secondary hover:text-primary"
           }`}
         >
-          <Users size={14} />
+          <Users size={14} className={activeTab === "members" ? "text-accent" : ""} />
           <span>Members ({members.length})</span>
         </button>
       </div>
@@ -391,38 +389,36 @@ export default function TripDashboardPage({ params }: { params: Promise<{ id: st
         <div className="space-y-6">
           {/* Top Metric Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="rounded-2xl bg-slate-900/60 border border-slate-800 p-5">
-              <span className="text-xs font-semibold text-slate-400">Total Group Spent</span>
-              <p className="text-2xl font-black text-white mt-1">
+            <Card className="p-6">
+              <span className="text-xs font-semibold text-secondary">Total Group Spent</span>
+              <p className="text-2xl font-black text-primary mt-1">
                 {trip.base_currency} {totalTripSpent.toFixed(2)}
               </p>
-            </div>
-            <div className="rounded-2xl bg-slate-900/60 border border-slate-800 p-5">
-              <span className="text-xs font-semibold text-slate-400">Total Expenses Logged</span>
-              <p className="text-2xl font-black text-indigo-400 mt-1">{expenses.length}</p>
-            </div>
-            <div className="rounded-2xl bg-slate-900/60 border border-slate-800 p-5">
-              <span className="text-xs font-semibold text-slate-400">Simplified Debts Required</span>
-              <p className="text-2xl font-black text-emerald-400 mt-1">{simplifiedDebts.length} Transfers</p>
-            </div>
+            </Card>
+            <Card className="p-6">
+              <span className="text-xs font-semibold text-secondary">Total Expenses Logged</span>
+              <p className="text-2xl font-black text-primary mt-1">{expenses.length}</p>
+            </Card>
+            <Card className="p-6">
+              <span className="text-xs font-semibold text-secondary">Simplified Debts Required</span>
+              <p className="text-2xl font-black text-accent mt-1">{simplifiedDebts.length} Transfers</p>
+            </Card>
           </div>
 
           {/* Simplified Debt Solver Recommendations */}
-          <div className="rounded-3xl bg-slate-900/80 border border-slate-800 p-6 space-y-4">
+          <Card className="p-7 space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-base font-bold text-white">Smart Debt Simplification</h2>
-                <p className="text-xs text-slate-400">
+                <h2 className="text-base font-bold text-primary">Smart Debt Simplification</h2>
+                <p className="text-xs text-secondary">
                   Minimum bank transfers required to settle all debts in {trip.base_currency}
                 </p>
               </div>
-              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-indigo-950/80 text-indigo-400 border border-indigo-800/60">
-                Greedy Min-Cash-Flow
-              </span>
+              <Badge variant="accent">Greedy Min-Cash-Flow</Badge>
             </div>
 
             {simplifiedDebts.length === 0 ? (
-              <div className="p-6 text-center text-xs text-emerald-400 bg-emerald-950/20 border border-emerald-800/40 rounded-2xl">
+              <div className="p-6 text-center text-xs text-accent bg-accent-subtle border border-accent-border/40 rounded-2xl">
                 ✨ All debts are completely settled! Everyone is even.
               </div>
             ) : (
@@ -430,66 +426,65 @@ export default function TripDashboardPage({ params }: { params: Promise<{ id: st
                 {simplifiedDebts.map((debt, idx) => (
                   <div
                     key={idx}
-                    className="p-4 rounded-2xl bg-slate-950 border border-slate-800/90 flex items-center justify-between group hover:border-slate-700 transition"
+                    className="p-4 rounded-2xl bg-surface border border-subtle flex items-center justify-between shadow-apple-sm hover:border-strong transition-all duration-150"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="text-xs">
-                        <span className="font-bold text-white">{getUserName(debt.from_user_id)}</span>
-                        <span className="text-slate-500 mx-1.5">owes</span>
-                        <span className="font-bold text-indigo-400">{getUserName(debt.to_user_id)}</span>
-                      </div>
+                    <div className="text-xs">
+                      <span className="font-bold text-primary">{getUserName(debt.from_user_id)}</span>
+                      <span className="text-muted mx-1.5">owes</span>
+                      <span className="font-bold text-accent">{getUserName(debt.to_user_id)}</span>
                     </div>
 
                     <div className="flex items-center gap-3">
-                      <span className="font-black text-white text-sm">
+                      <span className="font-black text-primary text-sm">
                         {debt.currency} {debt.amount.toFixed(2)}
                       </span>
-                      <button
+                      <Button
+                        variant="primary"
+                        size="sm"
                         onClick={() => handleOpenSettle(debt.from_user_id, debt.to_user_id, debt.amount)}
-                        className="py-1 px-2.5 rounded-lg text-[11px] font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition shadow-sm"
                       >
                         Settle
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 ))}
               </div>
             )}
-          </div>
+          </Card>
 
           {/* Member Net Balances Table */}
-          <div className="rounded-3xl bg-slate-900/80 border border-slate-800 p-6 space-y-4">
-            <h2 className="text-base font-bold text-white">Member Balances</h2>
+          <Card className="p-7 space-y-4">
+            <h2 className="text-base font-bold text-primary">Member Balances</h2>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b border-slate-800 text-slate-400">
+                  <tr className="border-b border-subtle text-secondary">
                     <th className="pb-3 font-semibold">Member</th>
                     <th className="pb-3 font-semibold">Total Paid</th>
                     <th className="pb-3 font-semibold">Total Consumed</th>
                     <th className="pb-3 font-semibold text-right">Net Balance</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60">
+                <tbody className="divide-y divide-subtle">
                   {memberBalances.map((b) => {
                     const isPositive = b.net_balance > 0;
                     const isZero = Math.abs(b.net_balance) < 0.01;
                     return (
-                      <tr key={b.user_id} className="text-slate-300">
-                        <td className="py-3 font-semibold text-white">{getUserName(b.user_id)}</td>
-                        <td className="py-3">
+                      <tr key={b.user_id} className="text-secondary">
+                        <td className="py-3.5 font-semibold text-primary">{getUserName(b.user_id)}</td>
+                        <td className="py-3.5">
                           {trip.base_currency} {b.total_paid.toFixed(2)}
                         </td>
-                        <td className="py-3">
+                        <td className="py-3.5">
                           {trip.base_currency} {b.total_owed.toFixed(2)}
                         </td>
                         <td
-                          className={`py-3 text-right font-bold ${
+                          className={`py-3.5 text-right font-bold ${
                             isZero
-                              ? "text-slate-400"
+                              ? "text-muted"
                               : isPositive
-                              ? "text-emerald-400"
-                              : "text-rose-400"
+                              ? "text-accent"
+                              : "text-rose-500"
                           }`}
                         >
                           {isPositive ? "+" : ""}
@@ -501,7 +496,7 @@ export default function TripDashboardPage({ params }: { params: Promise<{ id: st
                 </tbody>
               </table>
             </div>
-          </div>
+          </Card>
         </div>
       )}
 
@@ -509,63 +504,65 @@ export default function TripDashboardPage({ params }: { params: Promise<{ id: st
       {activeTab === "expenses" && (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <h2 className="text-base font-bold text-white">Expense Ledger</h2>
-            <button
+            <h2 className="text-base font-bold text-primary">Expense Ledger</h2>
+            <Button
+              variant="primary"
+              size="sm"
               onClick={() => setIsAddExpenseOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 transition shadow-sm"
+              icon={<Plus size={14} />}
             >
-              <Plus size={14} />
               <span>Add Expense</span>
-            </button>
+            </Button>
           </div>
 
           {expenses.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-slate-800 p-12 text-center bg-slate-900/40">
-              <p className="text-xs text-slate-400 mb-4">No expenses recorded yet for this trip.</p>
-              <button
+            <Card className="border-dashed p-12 text-center bg-surface/50">
+              <p className="text-xs text-secondary mb-4">No expenses recorded yet for this trip.</p>
+              <Button
+                variant="primary"
+                size="sm"
                 onClick={() => setIsAddExpenseOpen(true)}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500"
+                icon={<Plus size={14} />}
               >
-                <Plus size={14} />
                 <span>Log First Expense</span>
-              </button>
-            </div>
+              </Button>
+            </Card>
           ) : (
             <div className="space-y-3">
               {expenses.map((exp) => (
-                <div
+                <Card
                   key={exp.id}
-                  className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                  className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-apple-sm"
                 >
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-slate-800 text-slate-300">
+                      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-surface-subtle text-secondary border border-subtle">
                         {exp.category}
                       </span>
-                      <h3 className="text-sm font-bold text-white">{exp.title}</h3>
+                      <h3 className="text-sm font-bold text-primary">{exp.title}</h3>
                     </div>
-                    <p className="text-xs text-slate-400">
-                      Paid by <span className="text-indigo-400 font-semibold">{getUserName(exp.paid_by_user_id)}</span> &bull;{" "}
+                    <p className="text-xs text-secondary">
+                      Paid by <span className="text-accent font-semibold">{getUserName(exp.paid_by_user_id)}</span> &bull;{" "}
                       {new Date(exp.date).toLocaleDateString()}
                     </p>
                     {exp.expense_items?.length > 1 && (
-                      <p className="text-[11px] text-slate-500 mt-1">
+                      <p className="text-[11px] text-muted mt-1">
                         {exp.expense_items.length} itemized items
                       </p>
                     )}
                   </div>
 
                   <div className="text-right">
-                    <div className="text-base font-black text-white">
+                    <div className="text-base font-black text-primary">
                       {exp.currency} {exp.amount.toFixed(2)}
                     </div>
                     {exp.currency !== trip.base_currency && (
-                      <p className="text-[11px] text-slate-400">
+                      <p className="text-[11px] text-muted">
                         &asymp; {trip.base_currency} {exp.base_currency_amount.toFixed(2)}
                       </p>
                     )}
                   </div>
-                </div>
+                </Card>
               ))}
             </div>
           )}
@@ -576,48 +573,48 @@ export default function TripDashboardPage({ params }: { params: Promise<{ id: st
       {activeTab === "activity" && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold text-white">Live Activity Feed</h2>
-            <span className="flex items-center gap-1.5 text-[11px] text-emerald-400 font-semibold">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <h2 className="text-base font-bold text-primary">Live Activity Feed</h2>
+            <span className="flex items-center gap-1.5 text-[11px] text-accent font-semibold">
+              <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
               Live Realtime Active
             </span>
           </div>
 
           {activities.length === 0 ? (
-            <div className="p-8 text-center text-xs text-slate-400 rounded-2xl bg-slate-900/40 border border-slate-800">
+            <Card className="p-8 text-center text-xs text-muted">
               No recent activity recorded yet.
-            </div>
+            </Card>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {activities.map((act) => (
-                <div
+                <Card
                   key={act.activity_id}
-                  className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center justify-between text-xs"
+                  className="p-3.5 flex items-center justify-between text-xs"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-slate-800 text-indigo-400">
+                    <div className="p-2 rounded-xl bg-surface-subtle text-accent border border-subtle">
                       {act.activity_type === "expense_added" ? (
                         <Receipt size={15} />
                       ) : act.activity_type === "settled" ? (
-                        <CheckCircle2 size={15} className="text-emerald-400" />
+                        <CheckCircle2 size={15} />
                       ) : (
                         <Users size={15} />
                       )}
                     </div>
                     <div>
-                      <p className="text-white font-semibold">{act.description}</p>
-                      <p className="text-[10px] text-slate-500">
+                      <p className="text-primary font-semibold">{act.description}</p>
+                      <p className="text-[10px] text-muted">
                         {new Date(act.created_at).toLocaleString()}
                       </p>
                     </div>
                   </div>
 
                   {act.amount > 0 && (
-                    <span className="font-bold text-white">
+                    <span className="font-bold text-primary">
                       {act.currency} {act.amount.toFixed(2)}
                     </span>
                   )}
-                </div>
+                </Card>
               ))}
             </div>
           )}
@@ -628,43 +625,44 @@ export default function TripDashboardPage({ params }: { params: Promise<{ id: st
       {activeTab === "members" && (
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <h2 className="text-base font-bold text-white">Trip Roster ({members.length})</h2>
-            <button
+            <h2 className="text-base font-bold text-primary">Trip Roster ({members.length})</h2>
+            <Button
+              variant="primary"
+              size="sm"
               onClick={() => setIsInviteOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500"
+              icon={<Share2 size={14} />}
             >
-              <Share2 size={14} />
               <span>Invite Friends</span>
-            </button>
+            </Button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {members.map((m) => (
-              <div
+              <Card
                 key={m.id}
-                className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center justify-between"
+                className="p-4 flex items-center justify-between shadow-apple-sm"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center text-white font-bold text-sm">
+                  <div className="w-10 h-10 rounded-2xl bg-accent text-white flex items-center justify-center font-bold text-sm shadow-accent">
                     {m.user?.name?.[0]?.toUpperCase() || m.user?.email?.[0]?.toUpperCase() || "U"}
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-white text-xs">{m.user?.name || "Anonymous"}</span>
+                      <span className="font-bold text-primary text-xs">{m.user?.name || "Anonymous"}</span>
                       {m.role === "owner" && (
-                        <span className="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase tracking-wider bg-indigo-950 text-indigo-400 border border-indigo-800/60">
+                        <Badge variant="accent" className="text-[9px] py-0 px-1.5">
                           Owner
-                        </span>
+                        </Badge>
                       )}
                     </div>
-                    <p className="text-[11px] text-slate-400">{m.user?.email}</p>
+                    <p className="text-[11px] text-muted">{m.user?.email}</p>
                   </div>
                 </div>
 
-                <div className="text-right text-[10px] text-slate-500">
+                <div className="text-right text-[10px] text-muted">
                   Joined {new Date(m.joined_at).toLocaleDateString()}
                 </div>
-              </div>
+              </Card>
             ))}
           </div>
         </div>
