@@ -10,6 +10,8 @@ export type ExpenseCategory =
   | 'flights'
   | 'other';
 
+export type ExpenseSplitType = 'equal' | 'itemized' | 'custom';
+
 export interface PaymentHandles {
   wise?: string;
   revolut?: string;
@@ -81,6 +83,7 @@ export interface Expense {
   exchange_rate: number; // Multiplier to convert to trip base_currency
   base_currency_amount: number; // amount * exchange_rate
   category: ExpenseCategory;
+  split_type?: ExpenseSplitType;
   paid_by_user_id: string;
   image_url?: string;
   notes?: string;
@@ -89,8 +92,8 @@ export interface Expense {
   include_tax: boolean;
   tax_percent: number;
   split_tax_equally: boolean;
-  items: ExpenseItem[];
-  assignments: ItemAssignment[];
+  items?: ExpenseItem[];
+  assignments?: ItemAssignment[];
   created_at: string;
   updated_at: string;
 }
@@ -118,6 +121,46 @@ export interface Settlement {
   currency: string;
   status: 'pending' | 'completed';
   notes?: string;
+  proof_image_url?: string;
   settled_at?: string;
   created_at: string;
+}
+
+export type InvitationStatus = 'pending' | 'accepted' | 'declined';
+
+export interface TripInvitation {
+  id: string;
+  trip_id: string;
+  email: string;
+  invited_by: string;
+  status: InvitationStatus;
+  created_at: string;
+  trip?: Trip;
+  inviter?: UserProfile;
+}
+
+export type NotificationType = 'invite' | 'expense_added' | 'settled' | 'general';
+
+export interface Notification {
+  id: string;
+  user_id: string;
+  type: NotificationType;
+  reference_id?: string;
+  message: string;
+  read: boolean;
+  created_at: string;
+}
+
+export type ActivityType = 'expense_added' | 'settled' | 'member_joined';
+
+export interface TripActivity {
+  activity_id: string;
+  trip_id: string;
+  created_at: string;
+  activity_type: ActivityType;
+  user_id: string;
+  amount: number;
+  currency: string;
+  description: string;
+  user?: UserProfile;
 }
