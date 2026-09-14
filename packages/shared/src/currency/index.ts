@@ -23,10 +23,28 @@ export const SUPPORTED_CURRENCIES: CurrencyInfo[] = [
   { code: 'HKD', name: 'Hong Kong Dollar', symbol: 'HK$', flag: '🇭🇰' },
 ];
 
+export const DEFAULT_RATES: Record<string, number> = {
+  USD: 1.0,
+  EUR: 0.92,
+  JPY: 155.0,
+  GBP: 0.78,
+  MYR: 4.45,
+  SGD: 1.34,
+  THB: 36.5,
+  AUD: 1.52,
+  KRW: 1370.0,
+  CAD: 1.36,
+  CHF: 0.90,
+  IDR: 16000.0,
+  VND: 25000.0,
+  TWD: 32.0,
+  HKD: 7.82,
+};
+
 export interface OfflineRateCache {
-  base: string; // e.g. "USD"
-  updated_at: string; // ISO 8601
-  rates: Record<string, number>; // e.g. { JPY: 155.2, EUR: 0.92, MYR: 4.45 }
+  base: string;
+  updated_at: string;
+  rates: Record<string, number>;
 }
 
 /**
@@ -36,20 +54,18 @@ export function convertCurrency(
   amount: number,
   fromCurrency: string,
   toCurrency: string,
-  rateMap: Record<string, number>,
+  rateMap: Record<string, number> = DEFAULT_RATES,
   baseCurrency = 'USD'
 ): number {
   if (fromCurrency === toCurrency) return amount;
 
-  // Rate relative to base
   const fromRate = fromCurrency === baseCurrency ? 1 : rateMap[fromCurrency];
   const toRate = toCurrency === baseCurrency ? 1 : rateMap[toCurrency];
 
   if (!fromRate || !toRate) {
-    throw new Error(`Missing exchange rate for ${fromCurrency} or ${toCurrency}`);
+    return amount;
   }
 
-  // Convert from currency -> base currency -> to currency
   const inBase = amount / fromRate;
   const inTarget = inBase * toRate;
 

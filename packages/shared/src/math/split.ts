@@ -17,7 +17,8 @@ export function roundToCents(amount: number): number {
  * proportional service charge, and proportional or equal tax distribution.
  */
 export function calculateExpenseShares(expense: Expense): UserExpenseShare[] {
-  const userIds = Array.from(new Set(expense.assignments.map(a => a.user_id)));
+  const assignments = expense.assignments || [];
+  const userIds = Array.from(new Set(assignments.map(a => a.user_id)));
   if (userIds.length === 0) {
     return [];
   }
@@ -29,7 +30,7 @@ export function calculateExpenseShares(expense: Expense): UserExpenseShare[] {
 
   if (expense.items && expense.items.length > 0) {
     expense.items.forEach(item => {
-      const itemAssignments = expense.assignments.filter(a => a.item_id === item.id);
+      const itemAssignments = assignments.filter(a => a.item_id === item.id);
       const totalPercentage = itemAssignments.reduce((sum, a) => sum + a.percentage, 0);
 
       if (totalPercentage > 0) {
@@ -79,3 +80,5 @@ export function calculateExpenseShares(expense: Expense): UserExpenseShare[] {
     };
   });
 }
+
+export const calculateItemizedSplit = calculateExpenseShares;

@@ -8,8 +8,12 @@
     "packages/*"
   ],
   "scripts": {
-    "web:dev": "npm --workspace=apps/web run dev",
-    "mobile:start": "npm --workspace=apps/mobile start"
+    "build:shared": "npm --workspace=packages/shared run build",
+    "build:web": "npm --workspace=apps/web run build",
+    "build": "npm run build:shared && npm run build:web",
+    "web:dev": "npm run build:shared && npm --workspace=apps/web run dev",
+    "mobile:start": "npm --workspace=apps/mobile start",
+    "test": "npm --workspace=packages/shared test"
   },
   "keywords": [
     "expense-splitter",
@@ -22,5 +26,8 @@
     "expo"
   ],
   "author": "Darrell Tan",
-  "license": "MIT"
+  "license": "MIT",
+  "overrides": {
+    "postcss": "^8.5.28"
+  }
 }
