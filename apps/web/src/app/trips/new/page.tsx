@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { Compass, Calendar, DollarSign, MapPin, ArrowRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { SUPPORTED_CURRENCIES } from "@evenly/shared";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
 
 export default function NewTripPage() {
   const [name, setName] = useState("");
@@ -63,61 +66,51 @@ export default function NewTripPage() {
 
   return (
     <div className="max-w-xl mx-auto py-8">
-      <div className="rounded-3xl bg-slate-900/90 border border-slate-800 p-8 shadow-2xl backdrop-blur-xl">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center">
+      <Card className="p-8">
+        <div className="flex items-center gap-3.5 mb-6">
+          <div className="w-12 h-12 rounded-2xl bg-accent-subtle text-accent border border-accent-border/40 flex items-center justify-center shadow-apple-sm">
             <Compass size={24} />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-white">Create New Trip</h1>
-            <p className="text-xs text-slate-400">Setup your travel group and start tracking shared expenses</p>
+            <h1 className="text-2xl font-bold tracking-tight text-primary">Create New Trip</h1>
+            <p className="text-xs text-secondary">Setup your travel group and start tracking shared expenses</p>
           </div>
         </div>
 
         {error && (
-          <div className="p-3.5 rounded-2xl bg-red-950/40 border border-red-800/60 text-red-300 text-xs mb-6">
+          <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-600 dark:text-rose-400 text-xs mb-6">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-              Trip Name <span className="text-indigo-400">*</span>
-            </label>
-            <input
-              type="text"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Tokyo Autumn 2026"
-              className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 transition"
-            />
-          </div>
+          <Input
+            label="Trip Name *"
+            type="text"
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="e.g. Tokyo Autumn 2026"
+          />
+
+          <Input
+            label="Destination"
+            type="text"
+            value={destination}
+            onChange={(e) => setDestination(e.target.value)}
+            placeholder="e.g. Tokyo, Japan"
+            icon={<MapPin size={16} />}
+          />
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">Destination</label>
-            <div className="relative">
-              <input
-                type="text"
-                value={destination}
-                onChange={(e) => setDestination(e.target.value)}
-                placeholder="e.g. Japan"
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 transition"
-              />
-              <MapPin size={16} className="absolute left-3.5 top-3 text-slate-500" />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-              Base Currency <span className="text-indigo-400">*</span>
+            <label className="block text-xs font-semibold text-secondary mb-1.5">
+              Base Currency *
             </label>
             <div className="relative">
               <select
                 value={baseCurrency}
                 onChange={(e) => setBaseCurrency(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:outline-none focus:border-indigo-500 transition appearance-none"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface border border-subtle text-sm text-primary focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all duration-150 appearance-none"
               >
                 {SUPPORTED_CURRENCIES.map((curr) => (
                   <option key={curr.code} value={curr.code}>
@@ -125,55 +118,43 @@ export default function NewTripPage() {
                   </option>
                 ))}
               </select>
-              <DollarSign size={16} className="absolute left-3.5 top-3 text-slate-500 pointer-events-none" />
+              <DollarSign size={16} className="absolute left-3.5 top-3 text-muted pointer-events-none" />
             </div>
-            <p className="text-[11px] text-slate-500 mt-1">All trip expenses will be converted to this currency for settlement balance calculations.</p>
+            <p className="text-[11px] text-muted mt-1">
+              All trip expenses will be converted to this currency for settlement balance calculations.
+            </p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">Start Date</label>
-              <div className="relative">
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full pl-10 pr-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-indigo-500 transition"
-                />
-                <Calendar size={14} className="absolute left-3.5 top-2.5 text-slate-500" />
-              </div>
-            </div>
+            <Input
+              label="Start Date"
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              icon={<Calendar size={14} />}
+            />
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">End Date</label>
-              <div className="relative">
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  className="w-full pl-10 pr-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-indigo-500 transition"
-                />
-                <Calendar size={14} className="absolute left-3.5 top-2.5 text-slate-500" />
-              </div>
-            </div>
+            <Input
+              label="End Date"
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              icon={<Calendar size={14} />}
+            />
           </div>
 
-          <button
+          <Button
             type="submit"
             disabled={loading}
-            className="w-full py-3 px-4 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 active:scale-[0.99] transition shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 disabled:opacity-50 mt-4"
+            variant="primary"
+            size="lg"
+            className="w-full mt-4"
+            icon={<ArrowRight size={16} />}
           >
-            {loading ? (
-              <span>Creating Trip...</span>
-            ) : (
-              <>
-                <span>Launch Trip Group</span>
-                <ArrowRight size={16} />
-              </>
-            )}
-          </button>
+            {loading ? "Creating Trip..." : "Launch Trip Group"}
+          </Button>
         </form>
-      </div>
+      </Card>
     </div>
   );
 }

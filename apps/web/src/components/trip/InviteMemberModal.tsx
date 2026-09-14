@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, Copy, Check, Mail, Share2, Sparkles } from "lucide-react";
+import { X, Copy, Check, Mail, Share2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { Button } from "../ui/Button";
+import { Input } from "../ui/Input";
 
 interface InviteMemberModalProps {
   isOpen: boolean;
@@ -87,31 +89,31 @@ export function InviteMemberModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-800 p-6 shadow-2xl text-slate-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in">
+      <div className="relative w-full max-w-md rounded-3xl bg-elevated border border-subtle p-7 shadow-apple-xl text-primary">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-slate-400 hover:text-slate-200 p-1 rounded-full"
+          className="absolute top-5 right-5 text-muted hover:text-primary p-1.5 rounded-full hover:bg-surface-subtle transition-colors"
         >
           <X size={18} />
         </button>
 
-        <div className="flex items-center gap-3 mb-5">
-          <div className="p-2.5 rounded-xl bg-indigo-950/80 text-indigo-400 border border-indigo-800/60">
+        <div className="flex items-center gap-3.5 mb-5">
+          <div className="p-2.5 rounded-2xl bg-accent-subtle text-accent border border-accent-border/40 shadow-apple-sm">
             <Share2 size={20} />
           </div>
           <div>
-            <h3 className="text-base font-bold text-white">Invite to {tripName}</h3>
-            <p className="text-xs text-slate-400">Share with travel friends</p>
+            <h3 className="text-base font-bold text-primary">Invite to {tripName}</h3>
+            <p className="text-xs text-secondary">Share with travel friends</p>
           </div>
         </div>
 
         {message && (
           <div
-            className={`p-3 rounded-xl text-xs mb-4 border ${
+            className={`p-3 rounded-2xl text-xs mb-5 border ${
               message.type === "success"
-                ? "bg-emerald-950/40 border-emerald-800/60 text-emerald-300"
-                : "bg-red-950/40 border-red-800/60 text-red-300"
+                ? "bg-accent-subtle border-accent-border/60 text-accent"
+                : "bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-900/60 text-rose-600 dark:text-rose-400"
             }`}
           >
             {message.text}
@@ -120,64 +122,67 @@ export function InviteMemberModal({
 
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">Trip Invite Code</label>
+            <label className="block text-xs font-semibold text-secondary mb-1">Trip Invite Code</label>
             <div className="flex gap-2">
-              <div className="flex-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 font-mono text-base tracking-widest text-indigo-400 font-bold text-center">
+              <div className="flex-1 px-4 py-2.5 rounded-xl bg-surface-subtle border border-subtle font-mono text-base tracking-widest text-accent font-bold text-center">
                 {inviteCode}
               </div>
-              <button
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={handleCopyCode}
-                className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold flex items-center gap-1.5 transition"
+                icon={copiedCode ? <Check size={14} className="text-accent" /> : <Copy size={14} />}
               >
-                {copiedCode ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
                 <span>{copiedCode ? "Copied" : "Copy"}</span>
-              </button>
+              </Button>
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">Universal Join Link</label>
+            <label className="block text-xs font-semibold text-secondary mb-1">Universal Join Link</label>
             <div className="flex gap-2">
               <input
                 type="text"
                 readOnly
                 value={joinLink}
-                className="flex-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-300 truncate focus:outline-none"
+                className="flex-1 px-3 py-2 rounded-xl bg-surface-subtle border border-subtle text-xs text-secondary truncate focus:outline-none"
               />
-              <button
+              <Button
+                variant="secondary"
+                size="sm"
                 onClick={handleCopyLink}
-                className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold flex items-center gap-1.5 transition"
+                icon={copiedLink ? <Check size={14} className="text-accent" /> : <Copy size={14} />}
               >
-                {copiedLink ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
                 <span>{copiedLink ? "Copied" : "Copy"}</span>
-              </button>
+              </Button>
             </div>
           </div>
 
-          <div className="pt-2 border-t border-slate-800/80">
-            <label className="block text-xs font-semibold text-slate-300 mb-1">Or Invite by Email</label>
+          <div className="pt-3 border-t border-subtle">
+            <label className="block text-xs font-semibold text-secondary mb-1.5">Or Invite by Email</label>
             <form onSubmit={handleSendInvite} className="flex gap-2">
               <div className="relative flex-1">
-                <input
+                <Input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="friend@example.com"
-                  className="w-full pl-8 pr-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 transition"
+                  icon={<Mail size={14} />}
                 />
-                <Mail size={13} className="absolute left-2.5 top-2.5 text-slate-500" />
               </div>
-              <button
+              <Button
                 type="submit"
                 disabled={loading}
-                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition disabled:opacity-50"
+                variant="primary"
+                size="sm"
+                className="shrink-0"
               >
                 {loading ? "Sending..." : "Send Invite"}
-              </button>
+              </Button>
             </form>
-            <p className="text-[10px] text-slate-500 mt-1.5">
-              Registered users will receive an in-app notification.
+            <p className="text-[11px] text-muted mt-1.5">
+              Registered users will receive an in-app notification instantly.
             </p>
           </div>
         </div>

@@ -4,6 +4,9 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Mail, Lock, Sparkles, ArrowRight, CheckCircle2, AlertCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
 
 export default function LoginPage() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -73,15 +76,15 @@ export default function LoginPage() {
 
   return (
     <div className="max-w-md mx-auto py-12 px-4">
-      <div className="rounded-3xl bg-slate-900/90 border border-slate-800 p-8 shadow-2xl backdrop-blur-xl">
+      <Card className="p-8 backdrop-blur-xl">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-indigo-600 text-2xl mb-3 shadow-lg shadow-indigo-500/30">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-accent text-white text-2xl mb-3 shadow-accent">
             🌍
           </div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-white">
+          <h1 className="text-2xl font-black tracking-tight text-primary">
             {isMagicLink ? "Magic Link Sign In" : isSignUp ? "Create your Account" : "Welcome Back"}
           </h1>
-          <p className="text-xs text-slate-400 mt-1.5">
+          <p className="text-xs text-secondary mt-1.5">
             {isMagicLink
               ? "We will send an instant login link to your inbox"
               : isSignUp
@@ -94,8 +97,8 @@ export default function LoginPage() {
           <div
             className={`p-3.5 rounded-2xl text-xs flex items-start gap-2.5 mb-6 border ${
               message.type === "success"
-                ? "bg-emerald-950/40 border-emerald-800/60 text-emerald-300"
-                : "bg-red-950/40 border-red-800/60 text-red-300"
+                ? "bg-accent-subtle border-accent-border/60 text-accent"
+                : "bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-900/60 text-rose-600 dark:text-rose-400"
             }`}
           >
             {message.type === "success" ? (
@@ -109,75 +112,58 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {isSignUp && !isMagicLink && (
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">Display Name</label>
-              <input
-                type="text"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Alex Tan"
-                className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 transition"
-              />
-            </div>
+            <Input
+              label="Display Name"
+              type="text"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Alex Tan"
+            />
           )}
 
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">Email Address</label>
-            <div className="relative">
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="alex@example.com"
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 transition"
-              />
-              <Mail size={16} className="absolute left-3.5 top-3 text-slate-500" />
-            </div>
-          </div>
+          <Input
+            label="Email Address"
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="alex@example.com"
+            icon={<Mail size={16} />}
+          />
 
           {!isMagicLink && (
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">Password</label>
-              <div className="relative">
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 transition"
-                />
-                <Lock size={16} className="absolute left-3.5 top-3 text-slate-500" />
-              </div>
-            </div>
+            <Input
+              label="Password"
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              icon={<Lock size={16} />}
+            />
           )}
 
-          <button
+          <Button
             type="submit"
             disabled={loading}
-            className="w-full py-3 px-4 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 active:scale-[0.99] transition shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 disabled:opacity-50 mt-2"
+            variant="primary"
+            size="lg"
+            className="w-full mt-2"
+            icon={<ArrowRight size={16} />}
           >
-            {loading ? (
-              <span>Authenticating...</span>
-            ) : (
-              <>
-                <span>{isMagicLink ? "Send Magic Link" : isSignUp ? "Create Free Account" : "Sign In"}</span>
-                <ArrowRight size={16} />
-              </>
-            )}
-          </button>
+            {loading ? "Authenticating..." : isMagicLink ? "Send Magic Link" : isSignUp ? "Create Free Account" : "Sign In"}
+          </Button>
         </form>
 
-        <div className="mt-6 pt-6 border-t border-slate-800/80 flex flex-col gap-2.5 text-center text-xs text-slate-400">
+        <div className="mt-6 pt-6 border-t border-subtle flex flex-col gap-2.5 text-center text-xs text-secondary">
           <button
             type="button"
             onClick={() => {
               setIsMagicLink(!isMagicLink);
               setMessage(null);
             }}
-            className="inline-flex items-center justify-center gap-1.5 text-indigo-400 hover:text-indigo-300 transition font-medium"
+            className="inline-flex items-center justify-center gap-1.5 text-accent hover:opacity-80 transition font-medium"
           >
             <Sparkles size={13} />
             <span>{isMagicLink ? "Sign in with password instead" : "Use Passwordless Magic Link"}</span>
@@ -192,14 +178,14 @@ export default function LoginPage() {
                   setIsSignUp(!isSignUp);
                   setMessage(null);
                 }}
-                className="text-indigo-400 hover:text-indigo-300 font-semibold underline underline-offset-4 ml-1"
+                className="text-accent hover:underline font-semibold ml-1"
               >
                 {isSignUp ? "Sign In" : "Sign Up"}
               </button>
             </div>
           )}
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

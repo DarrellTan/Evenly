@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, CheckCircle2, ArrowRight } from "lucide-react";
+import { X, CheckCircle2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { Button } from "../ui/Button";
+import { Input } from "../ui/Input";
 
 interface Member {
   id: string;
@@ -94,27 +96,27 @@ export function SettleUpModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-800 p-6 shadow-2xl text-slate-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in">
+      <div className="relative w-full max-w-md rounded-3xl bg-elevated border border-subtle p-7 shadow-apple-xl text-primary">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-slate-400 hover:text-slate-200 p-1 rounded-full"
+          className="absolute top-5 right-5 text-muted hover:text-primary p-1.5 rounded-full hover:bg-surface-subtle transition-colors"
         >
           <X size={18} />
         </button>
 
-        <div className="flex items-center gap-3 mb-5">
-          <div className="p-2.5 rounded-xl bg-emerald-950/80 text-emerald-400 border border-emerald-800/60">
+        <div className="flex items-center gap-3.5 mb-5">
+          <div className="p-2.5 rounded-2xl bg-accent-subtle text-accent border border-accent-border/40 shadow-apple-sm">
             <CheckCircle2 size={20} />
           </div>
           <div>
-            <h3 className="text-base font-bold text-white">Record Settlement</h3>
-            <p className="text-xs text-slate-400">Mark debt as paid between members</p>
+            <h3 className="text-base font-bold text-primary">Record Settlement</h3>
+            <p className="text-xs text-secondary">Mark debt as paid between members</p>
           </div>
         </div>
 
         {error && (
-          <div className="p-3 rounded-xl bg-red-950/40 border border-red-800/60 text-red-300 text-xs mb-4">
+          <div className="p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-600 dark:text-rose-400 text-xs mb-4">
             {error}
           </div>
         )}
@@ -122,11 +124,11 @@ export function SettleUpModal({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-3 items-center">
             <div>
-              <label className="block text-[11px] font-semibold text-slate-400 mb-1">Paid By (Debtor)</label>
+              <label className="block text-[11px] font-semibold text-secondary mb-1">Paid By (Debtor)</label>
               <select
                 value={fromUserId}
                 onChange={(e) => setFromUserId(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-indigo-500"
+                className="w-full px-3 py-2 rounded-xl bg-surface border border-subtle text-xs text-primary focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
               >
                 {members.map((m) => (
                   <option key={m.user_id} value={m.user_id}>
@@ -137,11 +139,11 @@ export function SettleUpModal({
             </div>
 
             <div>
-              <label className="block text-[11px] font-semibold text-slate-400 mb-1">Paid To (Creditor)</label>
+              <label className="block text-[11px] font-semibold text-secondary mb-1">Paid To (Creditor)</label>
               <select
                 value={toUserId}
                 onChange={(e) => setToUserId(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white focus:outline-none focus:border-indigo-500"
+                className="w-full px-3 py-2 rounded-xl bg-surface border border-subtle text-xs text-primary focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
               >
                 {members.map((m) => (
                   <option key={m.user_id} value={m.user_id}>
@@ -152,59 +154,55 @@ export function SettleUpModal({
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">
-              Amount ({baseCurrency})
-            </label>
-            <input
-              type="number"
-              step="0.01"
-              required
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="0.00"
-              className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500"
-            />
-          </div>
+          <Input
+            label={`Amount (${baseCurrency}) *`}
+            type="number"
+            step="0.01"
+            required
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder="0.00"
+          />
 
           {paymentHandles && Object.keys(paymentHandles).length > 0 && (
-            <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs space-y-1">
-              <span className="font-semibold text-slate-400 block">Recipient Payment Handles:</span>
+            <div className="p-3.5 rounded-2xl bg-surface-subtle border border-subtle text-xs space-y-1.5">
+              <span className="font-semibold text-secondary block">Recipient Payment Handles:</span>
               <div className="flex flex-wrap gap-2 text-[11px]">
-                {paymentHandles.wise && <span className="text-indigo-400">Wise: {paymentHandles.wise}</span>}
-                {paymentHandles.revolut && <span className="text-indigo-400">Revolut: {paymentHandles.revolut}</span>}
-                {paymentHandles.venmo && <span className="text-indigo-400">Venmo: @{paymentHandles.venmo}</span>}
-                {paymentHandles.duitnow && <span className="text-indigo-400">DuitNow: {paymentHandles.duitnow}</span>}
+                {paymentHandles.wise && <span className="text-accent font-medium">Wise: {paymentHandles.wise}</span>}
+                {paymentHandles.revolut && <span className="text-accent font-medium">Revolut: {paymentHandles.revolut}</span>}
+                {paymentHandles.venmo && <span className="text-accent font-medium">Venmo: @{paymentHandles.venmo}</span>}
+                {paymentHandles.duitnow && <span className="text-accent font-medium">DuitNow: {paymentHandles.duitnow}</span>}
               </div>
             </div>
           )}
 
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">Notes (Optional)</label>
-            <input
-              type="text"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="e.g. Bank transfer reference #1234"
-              className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500"
-            />
-          </div>
+          <Input
+            label="Notes (Optional)"
+            type="text"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="e.g. Bank transfer reference #1234"
+          />
 
-          <div className="pt-2 flex gap-2">
-            <button
+          <div className="pt-3 flex gap-2.5">
+            <Button
               type="button"
+              variant="secondary"
+              size="md"
               onClick={onClose}
-              className="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300"
+              className="flex-1"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
               disabled={loading}
-              className="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-semibold text-white transition disabled:opacity-50"
+              variant="primary"
+              size="md"
+              className="flex-1"
             >
               {loading ? "Recording..." : "Record Payment"}
-            </button>
+            </Button>
           </div>
         </form>
       </div>
