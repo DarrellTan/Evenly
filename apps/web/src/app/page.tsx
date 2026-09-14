@@ -147,10 +147,6 @@ export default function HomePage() {
   return (
     <div className="py-12 sm:py-20 space-y-16">
       <div className="text-center max-w-3xl mx-auto space-y-6">
-        <Badge variant="accent" className="gap-1.5 py-1 px-3.5">
-          <Zap size={13} />
-          <span>The Free, Self-Hostable Splitwise Alternative</span>
-        </Badge>
 
         <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-primary leading-tight">
           Split travel expenses with friends.{" "}
