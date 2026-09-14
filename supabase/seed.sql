@@ -1,0 +1,2 @@
+-- Demo Seed Data (Optional for testing)
+-- Note: Replace UUIDs with actual auth user IDs when testing with Supabase Auth
