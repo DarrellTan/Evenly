@@ -1,0 +1,26 @@
+{
+  "name": "evenly-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Evenly - Free, self-hostable travel expense splitting for friend groups",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "web:dev": "npm --workspace=apps/web run dev",
+    "mobile:start": "npm --workspace=apps/mobile start"
+  },
+  "keywords": [
+    "expense-splitter",
+    "travel",
+    "splitwise-alternative",
+    "self-hosted",
+    "nextjs",
+    "supabase",
+    "react-native",
+    "expo"
+  ],
+  "author": "Darrell Tan",
+  "license": "MIT"
+}
